@@ -1,0 +1,31 @@
+VIDEO EDITOR (C#) - FILE LOCATIONS
+===================================
+
+After building, files will be located at:
+
+EXECUTABLE:
+-----------
+Full Path: C:\Users\rober\Documents\GitHub\Video_Editor\VideoEditorCS\bin\Release\net8.0-windows\VideoEditor.exe
+Directory: C:\Users\rober\Documents\GitHub\Video_Editor\VideoEditorCS\bin\Release\net8.0-windows\
+File Name: VideoEditor.exe
+
+To build: dotnet build VideoEditorCS.sln --configuration Release
+Or run: .\BuildInstaller.ps1
+
+
+WINDOWS INSTALLER:
+------------------
+Full Path: C:\Users\rober\Documents\GitHub\Video_Editor\VideoEditorCS\installer\VideoEditor-Setup.exe
+Directory: C:\Users\rober\Documents\GitHub\Video_Editor\VideoEditorCS\installer\
+File Name: VideoEditor-Setup.exe
+
+To build: Requires Inno Setup installed, then run .\BuildInstaller.ps1
+Or manually: Open BuildInstaller.iss in Inno Setup Compiler
+
+
+QUICK CHECK:
+------------
+After building, check these locations:
+- Executable: bin\Release\net8.0-windows\VideoEditor.exe
+- Installer: installer\VideoEditor-Setup.exe
+

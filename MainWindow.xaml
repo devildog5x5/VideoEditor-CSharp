@@ -1,0 +1,174 @@
+<Window x:Class="VideoEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:VideoEditor"
+        xmlns:utils="clr-namespace:VideoEditor.Utils"
+        mc:Ignorable="d"
+        Title="Professional Video Editor" Height="900" Width="1400"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <utils:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <Style TargetType="Button">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+        <Style TargetType="ListBox">
+            <Setter Property="Background" Value="{DynamicResource WindowBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+        </Style>
+        <Style TargetType="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource WindowBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+        </Style>
+        <Style TargetType="Slider">
+            <Setter Property="Foreground" Value="{DynamicResource HighlightColor}"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Background="{DynamicResource WindowBackground}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <ToolBar Grid.Row="0" Background="{DynamicResource ToolbarBackground}">
+            <Button Content="New Project" Command="{Binding NewProjectCommand}"/>
+            <Button Content="Open Project" Command="{Binding OpenProjectCommand}"/>
+            <Button Content="Save Project" Command="{Binding SaveProjectCommand}"/>
+            <Separator/>
+            <Button Content="Import Video" Command="{Binding ImportVideoCommand}"/>
+            <Separator/>
+            <Button Content="▶ Play" Command="{Binding PlayCommand}"/>
+            <Button Content="⏸ Pause" Command="{Binding PauseCommand}"/>
+            <Button Content="⏹ Stop" Command="{Binding StopCommand}"/>
+            <Separator/>
+            <Button Content="✂ Cut" Command="{Binding CutCommand}"/>
+            <Button Content="🗑 Delete" Command="{Binding DeleteCommand}"/>
+            <Separator/>
+            <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme}" 
+                      Width="150" Margin="5,0">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextColor}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <Separator/>
+            <Button Content="Export Video" Command="{Binding ExportCommand}"/>
+        </ToolBar>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="250"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="300"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Media Library -->
+            <Border Grid.Column="0" BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,1,0" Background="{DynamicResource WindowBackground}">
+                <Grid Background="{DynamicResource WindowBackground}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Media Library" FontWeight="Bold" FontSize="14" 
+                               Margin="10" Foreground="{DynamicResource TextColor}"/>
+                    <ListBox Grid.Row="1" ItemsSource="{Binding MediaFiles}" 
+                             SelectedItem="{Binding SelectedMediaFile}"
+                             DisplayMemberPath="FileName"
+                             Margin="5"
+                             Background="{DynamicResource WindowBackground}"
+                             Foreground="{DynamicResource TextColor}"/>
+                </Grid>
+            </Border>
+
+            <!-- Center: Preview and Timeline -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="200"/>
+                </Grid.RowDefinitions>
+
+                <!-- Preview -->
+                <Border Grid.Row="0" Background="Black" Margin="5">
+                    <Grid>
+                        <Image Source="{Binding PreviewFrame}" Stretch="Uniform" 
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <TextBlock Text="No video loaded" Foreground="White" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Visibility="{Binding ShowPreviewPlaceholder, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    </Grid>
+                </Border>
+
+                <!-- Timeline -->
+                <local:TimelineControl Grid.Row="1" DataContext="{Binding TimelineViewModel}"
+                                       Margin="5" Background="{DynamicResource TimelineBackground}"/>
+            </Grid>
+
+            <!-- Properties Panel -->
+            <Border Grid.Column="2" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1,0,0,0" Background="{DynamicResource WindowBackground}">
+                <ScrollViewer Background="{DynamicResource WindowBackground}">
+                    <StackPanel Margin="10" DataContext="{Binding PropertiesViewModel}" Background="{DynamicResource WindowBackground}">
+                        <TextBlock Text="Properties" FontWeight="Bold" FontSize="14" 
+                                   Foreground="{DynamicResource TextColor}" Margin="0,0,0,10"/>
+                        
+                        <!-- Brightness -->
+                        <TextBlock Text="Brightness" Foreground="{DynamicResource TextColor}" Margin="0,5"/>
+                        <Slider Minimum="-100" Maximum="100" Value="{Binding Brightness}" 
+                                TickFrequency="10" IsSnapToTickEnabled="True"/>
+                        <TextBlock Text="{Binding Brightness, StringFormat='{}{0}'}" 
+                                   Foreground="{DynamicResource TextColor}" HorizontalAlignment="Right"/>
+                        
+                        <!-- Contrast -->
+                        <TextBlock Text="Contrast" Foreground="{DynamicResource TextColor}" Margin="0,10,0,5"/>
+                        <Slider Minimum="0" Maximum="200" Value="{Binding Contrast}" 
+                                TickFrequency="10" IsSnapToTickEnabled="True"/>
+                        <TextBlock Text="{Binding Contrast, StringFormat='{}{0}%'}" 
+                                   Foreground="{DynamicResource TextColor}" HorizontalAlignment="Right"/>
+                        
+                        <!-- Saturation -->
+                        <TextBlock Text="Saturation" Foreground="{DynamicResource TextColor}" Margin="0,10,0,5"/>
+                        <Slider Minimum="0" Maximum="200" Value="{Binding Saturation}" 
+                                TickFrequency="10" IsSnapToTickEnabled="True"/>
+                        <TextBlock Text="{Binding Saturation, StringFormat='{}{0}%'}" 
+                                   Foreground="{DynamicResource TextColor}" HorizontalAlignment="Right"/>
+                        
+                        <!-- Volume -->
+                        <TextBlock Text="Volume" Foreground="{DynamicResource TextColor}" Margin="0,10,0,5"/>
+                        <Slider Minimum="0" Maximum="200" Value="{Binding Volume}" 
+                                TickFrequency="10" IsSnapToTickEnabled="True"/>
+                        <TextBlock Text="{Binding Volume, StringFormat='{}{0}%'}" 
+                                   Foreground="{DynamicResource TextColor}" HorizontalAlignment="Right"/>
+                        
+                        <!-- Speed -->
+                        <TextBlock Text="Speed" Foreground="{DynamicResource TextColor}" Margin="0,10,0,5"/>
+                        <Slider Minimum="25" Maximum="400" Value="{Binding Speed}" 
+                                TickFrequency="25" IsSnapToTickEnabled="True"/>
+                        <TextBlock Text="{Binding Speed, StringFormat='{}{0}%'}" 
+                                   Foreground="{DynamicResource TextColor}" HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- Status Bar -->
+        <StatusBar Grid.Row="2" Background="{DynamicResource StatusBarBackground}">
+            <TextBlock Text="{Binding StatusMessage}" Foreground="{DynamicResource StatusTextColor}"/>
+            <Separator/>
+            <TextBlock Text="{Binding ProgressMessage}" Foreground="{DynamicResource StatusTextColor}"/>
+        </StatusBar>
+    </Grid>
+</Window>
+
