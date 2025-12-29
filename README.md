@@ -16,7 +16,7 @@ A native Windows video editing application built with C# and WPF (.NET 8.0).
 ## Requirements
 
 - Windows 10/11 (64-bit)
-- .NET 8.0 Desktop Runtime (automatically included in installer)
+- .NET 8.0 Desktop Runtime
 
 ## Building
 
@@ -39,16 +39,6 @@ The installer is built using Inno Setup. Run:
 ```
 
 Or manually compile `BuildInstaller.iss` using Inno Setup Compiler.
-
-## Installation
-
-Download the installer from [Releases](https://github.com/devildog5x5/VideoEditor-CSharp/releases).
-
-The installer includes:
-- .NET 8.0 Desktop Runtime (auto-installed if needed)
-- All application files
-- Desktop shortcuts
-- Code signed by Robert Foster
 
 ## License
 
