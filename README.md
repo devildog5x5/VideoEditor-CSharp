@@ -1,78 +1,55 @@
 # Professional Video Editor (C#)
 
-A comprehensive video editing application built with C# and WPF, featuring multiple themes and professional editing capabilities.
+A native Windows video editing application built with C# and WPF (.NET 8.0).
 
 ## Features
 
-- ✅ **Video Import** - Support for MP4, AVI, MOV, MKV, and more
-- ✅ **Timeline Editing** - Multi-track timeline with video clips
-- ✅ **Cut & Trim** - Precise video cutting and trimming
-- ✅ **Multiple Themes** - 6 beautiful themes (Light, Dark, Ocean, Forest, Sunset, Midnight)
-- ✅ **Effects** - Brightness, Contrast, Saturation adjustments
-- ✅ **Audio Control** - Volume and speed adjustments
-- ✅ **Export** - Export to MP4, AVI, MOV formats
-- ✅ **Professional UI** - Modern WPF interface
+- Timeline-based video editing
+- Multi-track support
+- Video effects (brightness, contrast, saturation, etc.)
+- Audio controls (volume, speed, fade)
+- 6 beautiful themes (Light, Dark, Ocean, Forest, Sunset, Midnight)
+- Export to multiple formats (MP4, AVI, MOV)
+- Project save/load functionality
+- Modern WPF-based UI with smooth animations
 
 ## Requirements
 
-- .NET 8.0 Runtime (included in installer)
-- Windows 10/11
-- FFmpeg (for video processing)
+- Windows 10/11 (64-bit)
+- .NET 8.0 Desktop Runtime (automatically included in installer)
 
 ## Building
 
-### Build Executable
-```powershell
-dotnet build VideoEditorCS.sln --configuration Release
+### Prerequisites
+- .NET 8.0 SDK
+- Visual Studio 2022 or later (recommended)
+
+### Build Instructions
+
+```bash
+dotnet build --configuration Release
 ```
 
-### Build Installer
+### Building Installer
+
+The installer is built using Inno Setup. Run:
+
 ```powershell
 .\BuildInstaller.ps1
 ```
 
-## File Locations
+Or manually compile `BuildInstaller.iss` using Inno Setup Compiler.
 
-### Executable
-**Location:** `bin\Release\net8.0-windows\VideoEditor.exe`
+## Installation
 
-**Full Path:**
-```
-C:\Users\rober\Documents\GitHub\Video_Editor\VideoEditorCS\bin\Release\net8.0-windows\VideoEditor.exe
-```
+Download the installer from [Releases](https://github.com/devildog5x5/VideoEditor-CSharp/releases).
 
-### Windows Installer
-**Location:** `installer\VideoEditor-Setup.exe`
+The installer includes:
+- .NET 8.0 Desktop Runtime (auto-installed if needed)
+- All application files
+- Desktop shortcuts
+- Code signed by Robert Foster
 
-**Full Path:**
-```
-C:\Users\rober\Documents\GitHub\Video_Editor\VideoEditorCS\installer\VideoEditor-Setup.exe
-```
+## License
 
-## Themes
-
-The application includes 6 professional themes:
-- **Light** - Bright, clean interface
-- **Dark** - Easy on the eyes (default)
-- **Ocean** 🌊 - Calming blue tones
-- **Forest** 🌲 - Natural green tones
-- **Sunset** 🌅 - Warm orange tones
-- **Midnight** 🌙 - Deep purple tones
-
-Change themes from the toolbar dropdown.
-
-## Usage
-
-1. **Import Video** - Click "Import Video" or use File menu
-2. **Add to Timeline** - Drag videos from library to timeline
-3. **Edit** - Select clips and adjust properties
-4. **Export** - Click "Export Video" when ready
-
-## Both Versions Available
-
-This repository contains both:
-- **Python Version** - Original Python/PyQt6 implementation
-- **C# Version** - New C#/WPF implementation (this version)
-
-Both are fully functional and can be built independently.
-
+See LICENSE file (if present) or refer to the main repository.
