@@ -1,18 +1,223 @@
 <UserControl x:Class="VideoEditor.TimelineControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:VideoEditor.Models"
+             xmlns:utils="clr-namespace:VideoEditor.Utils">
+    <UserControl.Resources>
+        <utils:TimeToPixelConverter x:Key="TimeToPixelConverter"/>
+        <utils:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </UserControl.Resources>
     <Grid Background="{DynamicResource TimelineBackground}">
-        <Canvas x:Name="TimelineCanvas" Background="Transparent" 
-                MouseLeftButtonDown="TimelineCanvas_MouseLeftButtonDown"/>
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-            <ItemsControl x:Name="ClipsContainer" ItemsSource="{Binding Clips}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-            </ItemsControl>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Time Ruler with Controls -->
+        <Border Grid.Row="0" Background="{DynamicResource ToolbarBackground}" 
+                BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Control Buttons -->
+                <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+                            Orientation="Horizontal" 
+                            Margin="5,3,5,3" 
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left">
+                    <Button Content="▶ Play" 
+                            Command="{Binding DataContext.PlayCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            ToolTip="Play the video from the timeline. The playhead will move forward and the preview will update to show the current frame."
+                            Padding="6,3" Margin="2,0" MinWidth="55" FontSize="11"/>
+                    <Button Content="⏸ Pause" 
+                            Command="{Binding DataContext.PauseCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            ToolTip="Pause video playback. The playhead stops moving and the preview stays at the current frame."
+                            Padding="6,3" Margin="2,0" MinWidth="55" FontSize="11"/>
+                    <Button Content="⏹ Stop" 
+                            Command="{Binding DataContext.StopCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            ToolTip="Stop video playback and reset the playhead to the beginning of the timeline."
+                            Padding="6,3" Margin="2,0" MinWidth="55" FontSize="11"/>
+                    <Separator Margin="5,0" VerticalAlignment="Stretch"/>
+                    <Button Content="✂ Cut" 
+                            Command="{Binding DataContext.CutCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            ToolTip="Cut the selected clip at the current playhead position.&#x0a;&#x0a;How to use:&#x0a;1. Click a clip in the timeline to select it&#x0a;2. Move the playhead to where you want to cut&#x0a;3. Click Cut button&#x0a;4. The clip splits into two parts (marked with ✂)&#x0a;5. Select the part you want to delete&#x0a;6. Click Delete to remove it"
+                            Padding="6,3" Margin="2,0" MinWidth="55" FontSize="11"/>
+                    <Button Content="🗑 Delete" 
+                            Command="{Binding DataContext.DeleteCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            ToolTip="Delete the selected clip from the timeline.&#x0a;&#x0a;To delete a section:&#x0a;1. Cut at the start of the section&#x0a;2. Cut at the end of the section&#x0a;3. Select the middle clip&#x0a;4. Click Delete&#x0a;&#x0a;Clips created by cutting are marked with ✂"
+                            Padding="6,3" Margin="2,0" MinWidth="55" FontSize="11"/>
+                </StackPanel>
+                
+                <!-- Time Ruler Canvas -->
+                <Canvas Grid.Row="1" Grid.Column="1" x:Name="TimeRulerCanvas" Background="Transparent"
+                        ToolTip="Time ruler showing timeline position. Click anywhere on the timeline below to move the playhead to that time."/>
+            </Grid>
+        </Border>
+        
+        <!-- Timeline Tracks -->
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                      x:Name="TimelineScrollViewer">
+            <Canvas x:Name="TimelineCanvas" 
+                    Background="Transparent"
+                    Height="180"
+                    Width="2000"
+                    MouseLeftButtonDown="TimelineCanvas_MouseLeftButtonDown"
+                    AllowDrop="True">
+                <!-- Clips Container -->
+                <ItemsControl x:Name="ClipsContainer" 
+                              ItemsSource="{Binding Clips}"
+                              Background="Transparent">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <Canvas/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type models:VideoClip}">
+                            <Grid>
+                                <!-- Cut Indicator Lines (Left and Right borders for cut clips) -->
+                                <Border Background="{DynamicResource HighlightColor}" 
+                                        Opacity="0.8"
+                                        Width="3"
+                                        HorizontalAlignment="Left"
+                                        Visibility="{Binding IsCutFromOriginal, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        ToolTip="Cut start point"/>
+                                <Border Background="{DynamicResource HighlightColor}" 
+                                        Opacity="0.8"
+                                        Width="3"
+                                        HorizontalAlignment="Right"
+                                        Visibility="{Binding IsCutFromOriginal, Converter={StaticResource BoolToVisibilityConverter}}"
+                                        ToolTip="Cut end point"/>
+                                
+                                <!-- Main Clip Border -->
+                                <Border x:Name="ClipBorder"
+                                        Background="{DynamicResource ButtonBackground}"
+                                        BorderBrush="{DynamicResource BorderColor}"
+                                        BorderThickness="2"
+                                        CornerRadius="2"
+                                        Padding="5,2"
+                                        Margin="3,0"
+                                        MinWidth="50"
+                                        Cursor="Hand"
+                                        MouseLeftButtonDown="Clip_MouseLeftButtonDown"
+                                        MouseEnter="Clip_MouseEnter"
+                                        MouseLeave="Clip_MouseLeave">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
+                                            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource HighlightColor}"/>
+                                                    <Setter Property="BorderThickness" Value="3"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsCutFromOriginal}" Value="True">
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource HighlightColor}"/>
+                                                    <Setter Property="BorderThickness" Value="2"/>
+                                                </DataTrigger>
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding IsSelected}" Value="True"/>
+                                                        <Condition Binding="{Binding IsCutFromOriginal}" Value="True"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource HighlightColor}"/>
+                                                    <Setter Property="BorderThickness" Value="3"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <StackPanel Orientation="Vertical">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="✂ " 
+                                                       Foreground="{DynamicResource HighlightColor}"
+                                                       FontSize="12"
+                                                       FontWeight="Bold"
+                                                       Visibility="{Binding IsCutFromOriginal, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                       VerticalAlignment="Center"
+                                                       ToolTip="CUT CLIP - This segment was created by cutting"/>
+                                            <TextBlock Text="{Binding Name}" 
+                                                       Foreground="{DynamicResource TextColor}"
+                                                       FontSize="11"
+                                                       FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       MaxWidth="150"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                            <TextBlock Foreground="{DynamicResource TextColor}"
+                                                       FontSize="9"
+                                                       Opacity="0.8">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}Start: {0:F2}s | End: {1:F2}s | Duration: {2:F2}s">
+                                                        <Binding Path="StartTime"/>
+                                                        <Binding Path="EndTime"/>
+                                                        <Binding Path="Duration"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <TextBlock Text="CUT SEGMENT" 
+                                                   Foreground="{DynamicResource HighlightColor}"
+                                                   FontSize="8"
+                                                   FontWeight="Bold"
+                                                   Opacity="0.9"
+                                                   Visibility="{Binding IsCutFromOriginal, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                   Margin="0,2,0,0"
+                                                   ToolTip="This clip is a segment created by the Cut operation"/>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                    <ItemsControl.ItemContainerStyle>
+                        <Style TargetType="ContentPresenter">
+                            <Setter Property="Canvas.Left" Value="{Binding StartTime, Converter={StaticResource TimeToPixelConverter}}"/>
+                            <Setter Property="Canvas.Top" Value="60"/>
+                            <Setter Property="Width" Value="{Binding Duration, Converter={StaticResource TimeToPixelConverter}}"/>
+                        </Style>
+                    </ItemsControl.ItemContainerStyle>
+                </ItemsControl>
+                
+                <!-- Playhead -->
+                <Canvas x:Name="PlayheadContainer">
+                    <Line x:Name="PlayheadLine"
+                          Y1="0"
+                          Y2="180"
+                          Stroke="{DynamicResource HighlightColor}"
+                          StrokeThickness="3"
+                          StrokeDashArray="4,4"/>
+                    <!-- Playhead Handle -->
+                    <Ellipse x:Name="PlayheadHandle"
+                             Width="12"
+                             Height="12"
+                             Fill="{DynamicResource HighlightColor}"
+                             Stroke="{DynamicResource BorderColor}"
+                             StrokeThickness="1"
+                             Canvas.Top="-6"
+                             Cursor="Hand"/>
+                    <!-- Time Label -->
+                    <Border x:Name="PlayheadTimeLabel"
+                            Background="{DynamicResource ToolbarBackground}"
+                            BorderBrush="{DynamicResource BorderColor}"
+                            BorderThickness="1"
+                            CornerRadius="2"
+                            Padding="4,2"
+                            Canvas.Top="-25"
+                            Visibility="Visible">
+                        <TextBlock x:Name="PlayheadTimeText"
+                                   Foreground="{DynamicResource TextColor}"
+                                   FontSize="10"
+                                   FontWeight="Bold"
+                                   Text="{Binding PlayheadPosition, StringFormat='{}{0:F2}s'}"/>
+                    </Border>
+                </Canvas>
+            </Canvas>
         </ScrollViewer>
     </Grid>
 </UserControl>
-

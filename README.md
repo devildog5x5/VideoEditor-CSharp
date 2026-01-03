@@ -2,6 +2,13 @@
 
 A native Windows video editing application built with C# and WPF (.NET 8.0).
 
+## Demo Video
+
+A public domain sample video is included in the `Samples` folder for demonstration purposes:
+- **File**: `Samples/sample_video.mp4`
+- **Purpose**: Demonstration and testing of video editing features
+- **Usage**: Import this video into the Video Editor to explore all features
+
 ## Features
 
 - Timeline-based video editing

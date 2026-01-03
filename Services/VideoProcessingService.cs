@@ -7,21 +7,33 @@ namespace VideoEditor.Services
 {
     public class VideoProcessingService
     {
+        public bool IsFFmpegAvailable => FFmpegHelper.IsFFmpegAvailable();
+
         public TimeSpan GetVideoDuration(string filepath)
         {
+            if (!IsFFmpegAvailable)
+            {
+                throw new InvalidOperationException("FFmpeg is not installed. Please install FFmpeg to use video processing features.");
+            }
+
             try
             {
                 var info = FFProbe.Analyse(filepath);
                 return info.Duration;
             }
-            catch
+            catch (Exception ex)
             {
-                return TimeSpan.Zero;
+                throw new Exception($"Failed to get video duration: {ex.Message}", ex);
             }
         }
 
         public void ExtractFrame(string videoPath, string outputPath, TimeSpan time)
         {
+            if (!IsFFmpegAvailable)
+            {
+                throw new InvalidOperationException("FFmpeg is not installed. Preview frames require FFmpeg.");
+            }
+
             try
             {
                 // Extract frame using FFmpeg

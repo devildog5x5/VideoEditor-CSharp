@@ -33,108 +33,108 @@ namespace VideoEditor.Services
         public ThemeManager()
         {
             InitializeThemes();
-            CurrentTheme = Themes[1]; // Default to Dark
+            CurrentTheme = Themes[2]; // Default to Ocean
         }
 
         private void InitializeThemes()
         {
-            // Light Theme - High contrast for better readability
+            // Light Theme - Maximum readability with pure black text on white
             Themes.Add(new Theme
             {
                 Name = "Light",
                 WindowBackground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
-                WindowForeground = new SolidColorBrush(Color.FromRgb(20, 20, 20)),
-                ToolbarBackground = new SolidColorBrush(Color.FromRgb(248, 248, 248)),
-                TimelineBackground = new SolidColorBrush(Color.FromRgb(45, 45, 45)),
-                StatusBarBackground = new SolidColorBrush(Color.FromRgb(235, 235, 235)),
+                WindowForeground = new SolidColorBrush(Color.FromRgb(0, 0, 0)),
+                ToolbarBackground = new SolidColorBrush(Color.FromRgb(250, 250, 250)),
+                TimelineBackground = new SolidColorBrush(Color.FromRgb(20, 20, 20)),
+                StatusBarBackground = new SolidColorBrush(Color.FromRgb(245, 245, 245)),
                 TextColor = new SolidColorBrush(Color.FromRgb(0, 0, 0)),
-                BorderColor = new SolidColorBrush(Color.FromRgb(180, 180, 180)),
-                StatusTextColor = new SolidColorBrush(Color.FromRgb(20, 20, 20)),
-                ButtonBackground = new SolidColorBrush(Color.FromRgb(235, 235, 235)),
-                HighlightColor = new SolidColorBrush(Color.FromRgb(0, 102, 204))
+                BorderColor = new SolidColorBrush(Color.FromRgb(100, 100, 100)),
+                StatusTextColor = new SolidColorBrush(Color.FromRgb(0, 0, 0)),
+                ButtonBackground = new SolidColorBrush(Color.FromRgb(240, 240, 240)),
+                HighlightColor = new SolidColorBrush(Color.FromRgb(0, 100, 200))
             });
 
-            // Dark Theme - Brighter text for better readability
+            // Dark Theme - Professional dark theme with excellent readability
             Themes.Add(new Theme
             {
                 Name = "Dark",
-                WindowBackground = new SolidColorBrush(Color.FromRgb(25, 25, 25)),
+                WindowBackground = new SolidColorBrush(Color.FromRgb(45, 45, 48)),
                 WindowForeground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
-                ToolbarBackground = new SolidColorBrush(Color.FromRgb(32, 32, 32)),
-                TimelineBackground = new SolidColorBrush(Color.FromRgb(20, 20, 20)),
-                StatusBarBackground = new SolidColorBrush(Color.FromRgb(38, 38, 38)),
-                TextColor = new SolidColorBrush(Color.FromRgb(245, 245, 245)),
-                BorderColor = new SolidColorBrush(Color.FromRgb(85, 85, 85)),
-                StatusTextColor = new SolidColorBrush(Color.FromRgb(230, 230, 230)),
-                ButtonBackground = new SolidColorBrush(Color.FromRgb(65, 65, 65)),
-                HighlightColor = new SolidColorBrush(Color.FromRgb(70, 160, 255))
+                ToolbarBackground = new SolidColorBrush(Color.FromRgb(60, 60, 65)),
+                TimelineBackground = new SolidColorBrush(Color.FromRgb(30, 30, 35)),
+                StatusBarBackground = new SolidColorBrush(Color.FromRgb(55, 55, 60)),
+                TextColor = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                BorderColor = new SolidColorBrush(Color.FromRgb(150, 150, 150)),
+                StatusTextColor = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                ButtonBackground = new SolidColorBrush(Color.FromRgb(80, 80, 85)),
+                HighlightColor = new SolidColorBrush(Color.FromRgb(0, 120, 215))
             });
 
-            // Ocean Theme - Enhanced contrast for readability
+            // Ocean Theme - Highly readable dark blue theme (DEFAULT)
             Themes.Add(new Theme
             {
                 Name = "Ocean",
-                WindowBackground = new SolidColorBrush(Color.FromRgb(18, 35, 55)),
+                WindowBackground = new SolidColorBrush(Color.FromRgb(35, 50, 65)),
                 WindowForeground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
-                ToolbarBackground = new SolidColorBrush(Color.FromRgb(25, 45, 70)),
-                TimelineBackground = new SolidColorBrush(Color.FromRgb(12, 25, 40)),
-                StatusBarBackground = new SolidColorBrush(Color.FromRgb(28, 50, 75)),
-                TextColor = new SolidColorBrush(Color.FromRgb(240, 248, 255)),
-                BorderColor = new SolidColorBrush(Color.FromRgb(70, 110, 150)),
-                StatusTextColor = new SolidColorBrush(Color.FromRgb(220, 240, 255)),
-                ButtonBackground = new SolidColorBrush(Color.FromRgb(55, 95, 135)),
-                HighlightColor = new SolidColorBrush(Color.FromRgb(100, 200, 255))
+                ToolbarBackground = new SolidColorBrush(Color.FromRgb(45, 65, 85)),
+                TimelineBackground = new SolidColorBrush(Color.FromRgb(25, 40, 55)),
+                StatusBarBackground = new SolidColorBrush(Color.FromRgb(40, 60, 80)),
+                TextColor = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                BorderColor = new SolidColorBrush(Color.FromRgb(140, 180, 220)),
+                StatusTextColor = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                ButtonBackground = new SolidColorBrush(Color.FromRgb(70, 100, 140)),
+                HighlightColor = new SolidColorBrush(Color.FromRgb(120, 200, 255))
             });
 
-            // Forest Theme - Enhanced contrast for readability
+            // Forest Theme - Readable dark green theme
             Themes.Add(new Theme
             {
                 Name = "Forest",
-                WindowBackground = new SolidColorBrush(Color.FromRgb(22, 40, 28)),
+                WindowBackground = new SolidColorBrush(Color.FromRgb(35, 50, 40)),
                 WindowForeground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
-                ToolbarBackground = new SolidColorBrush(Color.FromRgb(28, 50, 32)),
-                TimelineBackground = new SolidColorBrush(Color.FromRgb(18, 32, 22)),
-                StatusBarBackground = new SolidColorBrush(Color.FromRgb(32, 55, 38)),
-                TextColor = new SolidColorBrush(Color.FromRgb(235, 250, 235)),
-                BorderColor = new SolidColorBrush(Color.FromRgb(70, 115, 75)),
-                StatusTextColor = new SolidColorBrush(Color.FromRgb(220, 245, 220)),
-                ButtonBackground = new SolidColorBrush(Color.FromRgb(60, 100, 68)),
-                HighlightColor = new SolidColorBrush(Color.FromRgb(80, 200, 110))
+                ToolbarBackground = new SolidColorBrush(Color.FromRgb(45, 65, 50)),
+                TimelineBackground = new SolidColorBrush(Color.FromRgb(25, 40, 30)),
+                StatusBarBackground = new SolidColorBrush(Color.FromRgb(40, 60, 45)),
+                TextColor = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                BorderColor = new SolidColorBrush(Color.FromRgb(120, 180, 130)),
+                StatusTextColor = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                ButtonBackground = new SolidColorBrush(Color.FromRgb(70, 110, 85)),
+                HighlightColor = new SolidColorBrush(Color.FromRgb(100, 220, 140))
             });
 
-            // Sunset Theme - Enhanced contrast for readability
+            // Sunset Theme - Readable dark orange theme
             Themes.Add(new Theme
             {
                 Name = "Sunset",
-                WindowBackground = new SolidColorBrush(Color.FromRgb(55, 35, 25)),
+                WindowBackground = new SolidColorBrush(Color.FromRgb(55, 40, 30)),
                 WindowForeground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
-                ToolbarBackground = new SolidColorBrush(Color.FromRgb(65, 45, 32)),
-                TimelineBackground = new SolidColorBrush(Color.FromRgb(45, 30, 20)),
-                StatusBarBackground = new SolidColorBrush(Color.FromRgb(75, 50, 38)),
-                TextColor = new SolidColorBrush(Color.FromRgb(255, 245, 235)),
-                BorderColor = new SolidColorBrush(Color.FromRgb(140, 100, 70)),
-                StatusTextColor = new SolidColorBrush(Color.FromRgb(255, 235, 210)),
-                ButtonBackground = new SolidColorBrush(Color.FromRgb(130, 90, 65)),
-                HighlightColor = new SolidColorBrush(Color.FromRgb(255, 160, 80))
+                ToolbarBackground = new SolidColorBrush(Color.FromRgb(70, 50, 40)),
+                TimelineBackground = new SolidColorBrush(Color.FromRgb(40, 30, 20)),
+                StatusBarBackground = new SolidColorBrush(Color.FromRgb(65, 45, 35)),
+                TextColor = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                BorderColor = new SolidColorBrush(Color.FromRgb(200, 150, 120)),
+                StatusTextColor = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                ButtonBackground = new SolidColorBrush(Color.FromRgb(120, 90, 70)),
+                HighlightColor = new SolidColorBrush(Color.FromRgb(255, 180, 100))
             });
 
-            // Midnight Theme - Enhanced contrast for readability
+            // Midnight Theme - Readable dark purple theme
             Themes.Add(new Theme
             {
                 Name = "Midnight",
-                WindowBackground = new SolidColorBrush(Color.FromRgb(12, 12, 22)),
+                WindowBackground = new SolidColorBrush(Color.FromRgb(40, 35, 50)),
                 WindowForeground = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
-                ToolbarBackground = new SolidColorBrush(Color.FromRgb(18, 18, 28)),
-                TimelineBackground = new SolidColorBrush(Color.FromRgb(8, 8, 18)),
-                StatusBarBackground = new SolidColorBrush(Color.FromRgb(22, 22, 32)),
-                TextColor = new SolidColorBrush(Color.FromRgb(240, 240, 255)),
-                BorderColor = new SolidColorBrush(Color.FromRgb(70, 70, 85)),
-                StatusTextColor = new SolidColorBrush(Color.FromRgb(220, 220, 245)),
-                ButtonBackground = new SolidColorBrush(Color.FromRgb(55, 55, 70)),
-                HighlightColor = new SolidColorBrush(Color.FromRgb(150, 130, 230))
+                ToolbarBackground = new SolidColorBrush(Color.FromRgb(50, 45, 65)),
+                TimelineBackground = new SolidColorBrush(Color.FromRgb(30, 25, 40)),
+                StatusBarBackground = new SolidColorBrush(Color.FromRgb(45, 40, 55)),
+                TextColor = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                BorderColor = new SolidColorBrush(Color.FromRgb(150, 140, 180)),
+                StatusTextColor = new SolidColorBrush(Color.FromRgb(255, 255, 255)),
+                ButtonBackground = new SolidColorBrush(Color.FromRgb(70, 65, 90)),
+                HighlightColor = new SolidColorBrush(Color.FromRgb(200, 180, 255))
             });
 
-            CurrentTheme = Themes[1]; // Default to Dark
+            CurrentTheme = Themes[2]; // Default to Ocean
         }
 
         public void ApplyTheme(Theme theme)

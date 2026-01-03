@@ -7,9 +7,12 @@
         xmlns:utils="clr-namespace:VideoEditor.Utils"
         mc:Ignorable="d"
         Title="Professional Video Editor" Height="900" Width="1400"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        AllowDrop="True">
     <Window.Resources>
         <utils:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        <utils:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+        <utils:CountToPluralConverter x:Key="CountToPluralConverter"/>
         <Style TargetType="Button">
             <Setter Property="Padding" Value="8,4"/>
             <Setter Property="Margin" Value="2"/>
@@ -32,6 +35,12 @@
         <Style TargetType="Slider">
             <Setter Property="Foreground" Value="{DynamicResource HighlightColor}"/>
         </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+        </Style>
+        <Style TargetType="Separator">
+            <Setter Property="Background" Value="{DynamicResource BorderColor}"/>
+        </Style>
     </Window.Resources>
     
     <Grid Background="{DynamicResource WindowBackground}">
@@ -43,21 +52,22 @@
 
         <!-- Toolbar -->
         <ToolBar Grid.Row="0" Background="{DynamicResource ToolbarBackground}">
-            <Button Content="New Project" Command="{Binding NewProjectCommand}"/>
-            <Button Content="Open Project" Command="{Binding OpenProjectCommand}"/>
-            <Button Content="Save Project" Command="{Binding SaveProjectCommand}"/>
+            <Button Content="New Project" Command="{Binding NewProjectCommand}" 
+                    ToolTip="Create a new video project. This will clear the current timeline and media library."/>
+            <Button Content="Open Project" Command="{Binding OpenProjectCommand}" 
+                    ToolTip="Open an existing project file (.veproj) to continue editing."/>
+            <Button Content="Save Project" Command="{Binding SaveProjectCommand}" 
+                    ToolTip="Save your current project including timeline clips and settings."/>
             <Separator/>
-            <Button Content="Import Video" Command="{Binding ImportVideoCommand}"/>
+            <Button Content="Import Video" Command="{Binding ImportVideoCommand}" 
+                    ToolTip="Import video files from your computer. You can also drag and drop video files directly into the Media Library or Timeline."/>
+            <Button Content="Add to Timeline" Command="{Binding AddSelectedToTimelineCommand}" 
+                    ToolTip="Add the currently selected video from Media Library to the Timeline at the playhead position. Tip: You can also double-click a video or drag it to the timeline."/>
             <Separator/>
-            <Button Content="▶ Play" Command="{Binding PlayCommand}"/>
-            <Button Content="⏸ Pause" Command="{Binding PauseCommand}"/>
-            <Button Content="⏹ Stop" Command="{Binding StopCommand}"/>
-            <Separator/>
-            <Button Content="✂ Cut" Command="{Binding CutCommand}"/>
-            <Button Content="🗑 Delete" Command="{Binding DeleteCommand}"/>
-            <Separator/>
+            <TextBlock Text="Theme:" VerticalAlignment="Center" Margin="5,0,5,0" Foreground="{DynamicResource TextColor}"/>
             <ComboBox ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme}" 
-                      Width="150" Margin="5,0">
+                      Width="120" Margin="0,0,5,0"
+                      ToolTip="Choose a color theme for the interface. Themes include Light, Dark, Ocean, Forest, Sunset, and Midnight.">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextColor}"/>
@@ -65,7 +75,8 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
             <Separator/>
-            <Button Content="Export Video" Command="{Binding ExportCommand}"/>
+            <Button Content="Export Video" Command="{Binding ExportCommand}" 
+                    ToolTip="Export your edited video to a file. This will combine all clips on the timeline into a single video file. Requires FFmpeg to be installed."/>
         </ToolBar>
 
         <!-- Main Content -->
@@ -83,14 +94,53 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                    <TextBlock Text="Media Library" FontWeight="Bold" FontSize="14" 
-                               Margin="10" Foreground="{DynamicResource TextColor}"/>
-                    <ListBox Grid.Row="1" ItemsSource="{Binding MediaFiles}" 
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="10,10,10,5">
+                            <TextBlock Text="📚 Media Library" FontWeight="Bold" FontSize="14" 
+                                       Foreground="{DynamicResource TextColor}" VerticalAlignment="Center"/>
+                            <TextBlock FontSize="11" 
+                                       Opacity="0.7"
+                                       Foreground="{DynamicResource TextColor}"
+                                       VerticalAlignment="Center"
+                                       Margin="5,0,0,0">
+                                <TextBlock.Text>
+                                    <MultiBinding StringFormat="({0} video{1})">
+                                        <Binding Path="MediaFiles.Count"/>
+                                        <Binding Path="MediaFiles.Count" Converter="{StaticResource CountToPluralConverter}"/>
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                            <TextBlock Text=" ℹ️" 
+                                       Foreground="{DynamicResource HighlightColor}" 
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Margin="5,0,0,0"
+                                       Cursor="Hand"
+                                       ToolTip="💡 Media Library Actions:&#x0a;• Double-click any video to add it to timeline&#x0a;• Drag videos to the timeline below&#x0a;• Click a video to select it and see preview&#x0a;• Use 'Add to Timeline' button when video is selected&#x0a;• Drag video files from Windows Explorer here to import"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <ListBox Grid.Row="1" 
+                             ItemsSource="{Binding MediaFiles}" 
                              SelectedItem="{Binding SelectedMediaFile}"
                              DisplayMemberPath="FileName"
-                             Margin="5"
+                             Margin="5,0,5,5"
                              Background="{DynamicResource WindowBackground}"
-                             Foreground="{DynamicResource TextColor}"/>
+                             Foreground="{DynamicResource TextColor}"
+                             BorderBrush="{DynamicResource BorderColor}"
+                             BorderThickness="1"
+                             AllowDrop="True"
+                             PreviewMouseMove="MediaLibraryListBox_PreviewMouseMove"
+                             Drop="MediaLibraryListBox_Drop"
+                             DragOver="MediaLibraryListBox_DragOver"
+                             MouseDoubleClick="MediaLibraryListBox_MouseDoubleClick"
+                             ToolTip="📋 Media Library Actions:&#x0a;• Double-click any video to add it to timeline&#x0a;• Drag videos to the timeline below&#x0a;• Click a video to select it and see preview&#x0a;• Use 'Add to Timeline' button when video is selected&#x0a;• Drag video files from Windows Explorer here to import">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+                                <Setter Property="Background" Value="{DynamicResource WindowBackground}"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
                 </Grid>
             </Border>
 
@@ -102,62 +152,168 @@
                 </Grid.RowDefinitions>
 
                 <!-- Preview -->
-                <Border Grid.Row="0" Background="Black" Margin="5">
+                <Border Grid.Row="0" Background="{DynamicResource TimelineBackground}" Margin="5" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
                     <Grid>
                         <Image Source="{Binding PreviewFrame}" Stretch="Uniform" 
                                HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        <TextBlock Text="No video loaded" Foreground="White" 
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Visibility="{Binding ShowPreviewPlaceholder, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="🎬 Video Preview" Foreground="{DynamicResource TextColor}" 
+                                       HorizontalAlignment="Center"
+                                       FontSize="18" FontWeight="Bold"
+                                       Margin="0,0,0,15"
+                                       Visibility="{Binding ShowPreviewPlaceholder, Converter={StaticResource BoolToVisibilityConverter}}"
+                                       ToolTip="This area shows the current video frame at the playhead position.&#x0a;&#x0a;💡 To get started:&#x0a;1. Import videos using 'Import Video' button&#x0a;2. Add videos to the timeline below&#x0a;3. Click the timeline to scrub through your video&#x0a;4. Use Play/Pause to preview your edit"/>
+                            <TextBlock Text="{Binding SelectedMediaFile.FileName, StringFormat='📹 {0}'}" 
+                                       Foreground="{DynamicResource TextColor}" 
+                                       HorizontalAlignment="Center"
+                                       FontSize="13" FontWeight="SemiBold"
+                                       Margin="0,10,0,5"
+                                       Visibility="{Binding SelectedMediaFile, Converter={StaticResource BoolToVisibilityConverter}}"
+                                       ToolTip="Preview updates automatically as you move the playhead on the timeline"/>
+                        </StackPanel>
                     </Grid>
                 </Border>
 
                 <!-- Timeline -->
-                <local:TimelineControl Grid.Row="1" DataContext="{Binding TimelineViewModel}"
-                                       Margin="5" Background="{DynamicResource TimelineBackground}"/>
+                <Border Grid.Row="1" Margin="5" Background="{DynamicResource TimelineBackground}"
+                        AllowDrop="True"
+                        Drop="TimelineArea_Drop"
+                        DragOver="TimelineArea_DragOver"
+                        BorderBrush="{DynamicResource BorderColor}"
+                        BorderThickness="1">
+                    <Grid>
+                        <local:TimelineControl DataContext="{Binding TimelineViewModel}"/>
+                        <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                                    Visibility="{Binding TimelineViewModel.Clips.Count, Converter={StaticResource CountToVisibilityConverter}}"
+                                    Text="⏱ Timeline" 
+                                    Foreground="{DynamicResource TextColor}" 
+                                    FontSize="16" FontWeight="Bold"
+                                    Cursor="Hand"
+                                    ToolTip="This is where you build your video edit&#x0a;&#x0a;💡 Quick Start:&#x0a;• Drag videos from Media Library here&#x0a;• Double-click videos to add them&#x0a;• Click anywhere to move the playhead&#x0a;• Click Play to preview your edit&#x0a;• Select clips to adjust properties&#x0a;&#x0a;✂ To Delete Sections:&#x0a;1. Select a clip, move playhead to cut point&#x0a;2. Click Cut (clip splits, marked with ✂)&#x0a;3. Repeat to isolate section to delete&#x0a;4. Select unwanted clip, click Delete"/>
+                    </Grid>
+                </Border>
             </Grid>
 
             <!-- Properties Panel -->
             <Border Grid.Column="2" BorderBrush="{DynamicResource BorderColor}" BorderThickness="1,0,0,0" Background="{DynamicResource WindowBackground}">
                 <ScrollViewer Background="{DynamicResource WindowBackground}">
                     <StackPanel Margin="10" DataContext="{Binding PropertiesViewModel}" Background="{DynamicResource WindowBackground}">
-                        <TextBlock Text="Properties" FontWeight="Bold" FontSize="14" 
-                                   Foreground="{DynamicResource TextColor}" Margin="0,0,0,10"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <TextBlock Text="⚙️ Video Properties" FontWeight="Bold" FontSize="14" 
+                                       Foreground="{DynamicResource TextColor}"/>
+                            <TextBlock Text=" ℹ️" 
+                                       Foreground="{DynamicResource HighlightColor}" 
+                                       FontSize="12"
+                                       VerticalAlignment="Center"
+                                       Margin="5,0,0,0"
+                                       Cursor="Hand"
+                                       ToolTip="Adjust effects and settings for the selected clip on the timeline.&#x0a;&#x0a;💡 How to use:&#x0a;1. Click a clip in the timeline to select it&#x0a;2. Adjust sliders below to change effects&#x0a;3. Changes apply to the selected clip only&#x0a;4. Each clip can have different settings"/>
+                        </StackPanel>
                         
                         <!-- Brightness -->
-                        <TextBlock Text="Brightness" Foreground="{DynamicResource TextColor}" Margin="0,5"/>
-                        <Slider Minimum="-100" Maximum="100" Value="{Binding Brightness}" 
-                                TickFrequency="10" IsSnapToTickEnabled="True"/>
-                        <TextBlock Text="{Binding Brightness, StringFormat='{}{0}'}" 
-                                   Foreground="{DynamicResource TextColor}" HorizontalAlignment="Right"/>
+                        <StackPanel Margin="0,5,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Brightness" Foreground="{DynamicResource TextColor}" VerticalAlignment="Center"/>
+                                <TextBlock Text=" ℹ️" 
+                                           Foreground="{DynamicResource HighlightColor}" 
+                                           FontSize="10"
+                                           VerticalAlignment="Center"
+                                           Margin="3,0,0,0"
+                                           ToolTip="Adjust the brightness of the video. Range: -100 (darker) to +100 (brighter). Default: 0"/>
+                            </StackPanel>
+                            <Slider Minimum="-100" Maximum="100" Value="{Binding Brightness}" 
+                                    TickFrequency="10" IsSnapToTickEnabled="True"
+                                    ToolTip="Drag to adjust brightness. Negative values make the video darker, positive values make it brighter. Default: 0"/>
+                            <TextBlock Text="{Binding Brightness, StringFormat='Value: {0}'}" 
+                                       Foreground="{DynamicResource TextColor}" 
+                                       HorizontalAlignment="Right"
+                                       FontSize="9"
+                                       Opacity="0.7"/>
+                        </StackPanel>
                         
                         <!-- Contrast -->
-                        <TextBlock Text="Contrast" Foreground="{DynamicResource TextColor}" Margin="0,10,0,5"/>
-                        <Slider Minimum="0" Maximum="200" Value="{Binding Contrast}" 
-                                TickFrequency="10" IsSnapToTickEnabled="True"/>
-                        <TextBlock Text="{Binding Contrast, StringFormat='{}{0}%'}" 
-                                   Foreground="{DynamicResource TextColor}" HorizontalAlignment="Right"/>
+                        <StackPanel Margin="0,10,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Contrast" Foreground="{DynamicResource TextColor}" VerticalAlignment="Center"/>
+                                <TextBlock Text=" ℹ️" 
+                                           Foreground="{DynamicResource HighlightColor}" 
+                                           FontSize="10"
+                                           VerticalAlignment="Center"
+                                           Margin="3,0,0,0"
+                                           ToolTip="Adjust the contrast of the video. Range: 0% (no contrast) to 200% (high contrast). Default: 100%"/>
+                            </StackPanel>
+                            <Slider Minimum="0" Maximum="200" Value="{Binding Contrast}" 
+                                    TickFrequency="10" IsSnapToTickEnabled="True"
+                                    ToolTip="Drag to adjust contrast. Higher values increase the difference between light and dark areas. Default: 100%"/>
+                            <TextBlock Text="{Binding Contrast, StringFormat='Value: {0}%'}" 
+                                       Foreground="{DynamicResource TextColor}" 
+                                       HorizontalAlignment="Right"
+                                       FontSize="9"
+                                       Opacity="0.7"/>
+                        </StackPanel>
                         
                         <!-- Saturation -->
-                        <TextBlock Text="Saturation" Foreground="{DynamicResource TextColor}" Margin="0,10,0,5"/>
-                        <Slider Minimum="0" Maximum="200" Value="{Binding Saturation}" 
-                                TickFrequency="10" IsSnapToTickEnabled="True"/>
-                        <TextBlock Text="{Binding Saturation, StringFormat='{}{0}%'}" 
-                                   Foreground="{DynamicResource TextColor}" HorizontalAlignment="Right"/>
+                        <StackPanel Margin="0,10,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Saturation" Foreground="{DynamicResource TextColor}" VerticalAlignment="Center"/>
+                                <TextBlock Text=" ℹ️" 
+                                           Foreground="{DynamicResource HighlightColor}" 
+                                           FontSize="10"
+                                           VerticalAlignment="Center"
+                                           Margin="3,0,0,0"
+                                           ToolTip="Adjust the color saturation. Range: 0% (grayscale) to 200% (vivid colors). Default: 100%"/>
+                            </StackPanel>
+                            <Slider Minimum="0" Maximum="200" Value="{Binding Saturation}" 
+                                    TickFrequency="10" IsSnapToTickEnabled="True"
+                                    ToolTip="Drag to adjust color saturation. Lower values make colors more muted, higher values make them more vibrant. Default: 100%"/>
+                            <TextBlock Text="{Binding Saturation, StringFormat='Value: {0}%'}" 
+                                       Foreground="{DynamicResource TextColor}" 
+                                       HorizontalAlignment="Right"
+                                       FontSize="9"
+                                       Opacity="0.7"/>
+                        </StackPanel>
                         
                         <!-- Volume -->
-                        <TextBlock Text="Volume" Foreground="{DynamicResource TextColor}" Margin="0,10,0,5"/>
-                        <Slider Minimum="0" Maximum="200" Value="{Binding Volume}" 
-                                TickFrequency="10" IsSnapToTickEnabled="True"/>
-                        <TextBlock Text="{Binding Volume, StringFormat='{}{0}%'}" 
-                                   Foreground="{DynamicResource TextColor}" HorizontalAlignment="Right"/>
+                        <StackPanel Margin="0,10,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Volume" Foreground="{DynamicResource TextColor}" VerticalAlignment="Center"/>
+                                <TextBlock Text=" 🔊" 
+                                           Foreground="{DynamicResource HighlightColor}" 
+                                           FontSize="10"
+                                           VerticalAlignment="Center"
+                                           Margin="3,0,0,0"
+                                           ToolTip="Adjust the audio volume. Range: 0% (mute) to 200% (double volume). Default: 100%"/>
+                            </StackPanel>
+                            <Slider Minimum="0" Maximum="200" Value="{Binding Volume}" 
+                                    TickFrequency="10" IsSnapToTickEnabled="True"
+                                    ToolTip="Drag to adjust audio volume. 100% is normal volume, 0% is muted, 200% is double volume. Default: 100%"/>
+                            <TextBlock Text="{Binding Volume, StringFormat='Value: {0}%'}" 
+                                       Foreground="{DynamicResource TextColor}" 
+                                       HorizontalAlignment="Right"
+                                       FontSize="9"
+                                       Opacity="0.7"/>
+                        </StackPanel>
                         
                         <!-- Speed -->
-                        <TextBlock Text="Speed" Foreground="{DynamicResource TextColor}" Margin="0,10,0,5"/>
-                        <Slider Minimum="25" Maximum="400" Value="{Binding Speed}" 
-                                TickFrequency="25" IsSnapToTickEnabled="True"/>
-                        <TextBlock Text="{Binding Speed, StringFormat='{}{0}%'}" 
-                                   Foreground="{DynamicResource TextColor}" HorizontalAlignment="Right"/>
+                        <StackPanel Margin="0,10,0,0">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Playback Speed" Foreground="{DynamicResource TextColor}" VerticalAlignment="Center"/>
+                                <TextBlock Text=" ⚡" 
+                                           Foreground="{DynamicResource HighlightColor}" 
+                                           FontSize="10"
+                                           VerticalAlignment="Center"
+                                           Margin="3,0,0,0"
+                                           ToolTip="Adjust the playback speed. Range: 25% (slow motion) to 400% (fast forward). Default: 100% (normal speed)"/>
+                            </StackPanel>
+                            <Slider Minimum="25" Maximum="400" Value="{Binding Speed}" 
+                                    TickFrequency="25" IsSnapToTickEnabled="True"
+                                    ToolTip="Drag to adjust playback speed. 100% is normal speed, lower values create slow motion, higher values create fast forward. Default: 100%"/>
+                            <TextBlock Text="{Binding Speed, StringFormat='Value: {0}%'}" 
+                                       Foreground="{DynamicResource TextColor}" 
+                                       HorizontalAlignment="Right"
+                                       FontSize="9"
+                                       Opacity="0.7"/>
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </Border>
