@@ -17,18 +17,18 @@ namespace VideoEditor
         public MainWindow(MainViewModel viewModel)
         {
             try
-            {
-                InitializeComponent();
+        {
+            InitializeComponent();
                 
                 if (viewModel == null)
                 {
                     throw new ArgumentNullException(nameof(viewModel));
                 }
                 
-                ViewModel = viewModel;
-                DataContext = ViewModel;
-                
-                // Connect timeline selection to properties
+            ViewModel = viewModel;
+            DataContext = ViewModel;
+            
+            // Connect timeline selection to properties
                 if (ViewModel.TimelineViewModel != null)
                 {
                     ViewModel.TimelineViewModel.PropertyChanged += (s, e) =>
@@ -55,8 +55,8 @@ namespace VideoEditor
                 // Update timeline hint visibility when clips are added
                 if (ViewModel.TimelineViewModel != null)
                 {
-                    ViewModel.TimelineViewModel.PropertyChanged += (s, e) =>
-                    {
+            ViewModel.TimelineViewModel.PropertyChanged += (s, e) =>
+            {
                         // Timeline hint will be hidden when clips are added (handled by binding if we add it)
                     };
                 }
