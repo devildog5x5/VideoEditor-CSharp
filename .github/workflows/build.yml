@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore VideoEditorCS.sln
+
+      - name: Build
+        run: dotnet build VideoEditorCS.sln --configuration Release --no-restore
+
+      - name: Upload Release output
+        uses: actions/upload-artifact@v4
+        with:
+          name: VideoEditor-Release-net8.0-windows
+          path: bin/Release/net8.0-windows/
+          if-no-files-found: error
+
+      - name: Summary
+        if: success()
+        shell: bash
+        run: |
+          {
+            echo "## Build succeeded"
+            echo ""
+            echo "- **Configuration:** Release"
+            echo "- **Artifact:** \`VideoEditor-Release-net8.0-windows\` (download from this run’s Artifacts section)"
+            echo ""
+            echo "[View this workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          } >> "$GITHUB_STEP_SUMMARY"
