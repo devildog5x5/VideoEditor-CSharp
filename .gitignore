@@ -1,4 +1,4 @@
-﻿# Build results
+# Build results
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
@@ -20,6 +20,11 @@ bld/
 *.suo
 *.userosscache
 *.sln.docstates
+
+# Local publish / packaging (Publish-ReleasePackages.ps1, CI layout)
+dist/
+publish/
+artifacts/
 
 # Installer
 installer/*.exe

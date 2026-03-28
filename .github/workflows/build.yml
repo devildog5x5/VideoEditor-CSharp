@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-and-package:
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -22,28 +22,73 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      - name: Read package version
+        id: pkgver
+        shell: pwsh
+        run: |
+          $v = (dotnet msbuild VideoEditorCS.csproj -getProperty:Version -nologo).Trim()
+          "version=$v" >> $env:GITHUB_OUTPUT
+
       - name: Restore
         run: dotnet restore VideoEditorCS.sln
 
       - name: Build
         run: dotnet build VideoEditorCS.sln --configuration Release --no-restore
 
-      - name: Upload Release output
+      - name: Publish Windows x64 (self-contained)
+        run: dotnet publish VideoEditorCS.csproj --configuration Release -r win-x64 --self-contained true -o publish/win-x64 --no-restore
+
+      - name: Publish Windows ARM64 (self-contained)
+        run: dotnet publish VideoEditorCS.csproj --configuration Release -r win-arm64 --self-contained true -o publish/win-arm64 --no-restore
+
+      - name: Zip portable packages
+        shell: pwsh
+        env:
+          PKG_VERSION: ${{ steps.pkgver.outputs.version }}
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          Compress-Archive -Path "publish/win-x64/*" -DestinationPath "dist/VideoEditor-$env:PKG_VERSION-win-x64.zip" -Force
+          Compress-Archive -Path "publish/win-arm64/*" -DestinationPath "dist/VideoEditor-$env:PKG_VERSION-win-arm64.zip" -Force
+
+      - name: Upload portable Windows x64 (.zip)
         uses: actions/upload-artifact@v4
         with:
-          name: VideoEditor-Release-net8.0-windows
+          name: VideoEditor-${{ steps.pkgver.outputs.version }}-win-x64-zip
+          path: dist/VideoEditor-${{ steps.pkgver.outputs.version }}-win-x64.zip
+          if-no-files-found: error
+
+      - name: Upload portable Windows ARM64 (.zip)
+        uses: actions/upload-artifact@v4
+        with:
+          name: VideoEditor-${{ steps.pkgver.outputs.version }}-win-arm64-zip
+          path: dist/VideoEditor-${{ steps.pkgver.outputs.version }}-win-arm64.zip
+          if-no-files-found: error
+
+      - name: Upload framework-dependent folder (requires .NET 8 Desktop Runtime)
+        uses: actions/upload-artifact@v4
+        with:
+          name: VideoEditor-framework-dependent-net8.0-windows
           path: bin/Release/net8.0-windows/
           if-no-files-found: error
 
       - name: Summary
         if: success()
         shell: bash
+        env:
+          PKG_VERSION: ${{ steps.pkgver.outputs.version }}
         run: |
           {
-            echo "## Build succeeded"
+            echo "## Build and packages"
             echo ""
-            echo "- **Configuration:** Release"
-            echo "- **Artifact:** \`VideoEditor-Release-net8.0-windows\` (download from this run’s Artifacts section)"
+            echo "This app is **WPF (.NET)** and runs on **Windows only**. There is no macOS or Linux build of this UI (a different UI stack such as Avalonia or MAUI would be required)."
+            echo ""
+            echo "### Artifacts (this run)"
+            echo ""
+            echo "| Platform | Artifact |"
+            echo "|----------|----------|"
+            echo "| Windows x64 (portable, self-contained) | \`VideoEditor-${PKG_VERSION}-win-x64-zip\` |"
+            echo "| Windows ARM64 (portable, self-contained) | \`VideoEditor-${PKG_VERSION}-win-arm64-zip\` |"
+            echo "| Windows (smaller; needs [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)) | \`VideoEditor-framework-dependent-net8.0-windows\` |"
             echo ""
             echo "[View this workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           } >> "$GITHUB_STEP_SUMMARY"
