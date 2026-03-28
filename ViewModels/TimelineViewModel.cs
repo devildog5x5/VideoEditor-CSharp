@@ -22,20 +22,6 @@ namespace VideoEditor.ViewModels
         private double? _cutStartPosition;
         private VideoClip? _cutStartClip;
 
-        // Selection state
-        private HashSet<VideoClip> _selectedClips = new();
-        private VideoClip? _lastSelectedClip;
-        private bool _isMultiSelectMode;
-
-        // Drag/Resize state
-        private bool _isDragging;
-        private bool _isResizing;
-        private VideoClip? _dragClip;
-        private double _dragStartX;
-        private double _dragStartTime;
-        private bool _resizeFromStart;
-        private double _resizeStartDuration;
-
         [ObservableProperty]
         private ObservableCollection<VideoClip> clips = new();
 
