@@ -51,6 +51,7 @@ jobs:
           Compress-Archive -Path "publish/win-arm64/*" -DestinationPath "dist/VideoEditor-$env:PKG_VERSION-win-arm64.zip" -Force
 
       - name: Upload portable Windows x64 (.zip)
+        id: artifact-x64
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
@@ -60,6 +61,7 @@ jobs:
           retention-days: 3
 
       - name: Upload portable Windows ARM64 (.zip)
+        id: artifact-arm64
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
@@ -69,6 +71,7 @@ jobs:
           retention-days: 3
 
       - name: Upload framework-dependent folder (requires .NET 8 Desktop Runtime)
+        id: artifact-framework
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
@@ -82,6 +85,9 @@ jobs:
         shell: bash
         env:
           PKG_VERSION: ${{ steps.pkgver.outputs.version }}
+          ARTIFACT_X64: ${{ steps.artifact-x64.outcome }}
+          ARTIFACT_ARM64: ${{ steps.artifact-arm64.outcome }}
+          ARTIFACT_FRAMEWORK: ${{ steps.artifact-framework.outcome }}
         run: |
           {
             echo "## Build and packages"
@@ -92,9 +98,15 @@ jobs:
             echo ""
             echo "| Platform | Artifact |"
             echo "|----------|----------|"
-            echo "| Windows x64 (portable, self-contained) | \`VideoEditor-${PKG_VERSION}-win-x64-zip\` |"
-            echo "| Windows ARM64 (portable, self-contained) | \`VideoEditor-${PKG_VERSION}-win-arm64-zip\` |"
-            echo "| Windows (smaller; needs [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)) | \`VideoEditor-framework-dependent-net8.0-windows\` |"
+            if [ "$ARTIFACT_X64" = "success" ]; then
+              echo "| Windows x64 (portable, self-contained) | \`VideoEditor-${PKG_VERSION}-win-x64-zip\` |"
+            fi
+            if [ "$ARTIFACT_ARM64" = "success" ]; then
+              echo "| Windows ARM64 (portable, self-contained) | \`VideoEditor-${PKG_VERSION}-win-arm64-zip\` |"
+            fi
+            if [ "$ARTIFACT_FRAMEWORK" = "success" ]; then
+              echo "| Windows (smaller; needs [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)) | \`VideoEditor-framework-dependent-net8.0-windows\` |"
+            fi
             echo ""
             echo "[View this workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
           } >> "$GITHUB_STEP_SUMMARY"
