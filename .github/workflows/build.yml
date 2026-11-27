@@ -51,25 +51,31 @@ jobs:
           Compress-Archive -Path "publish/win-arm64/*" -DestinationPath "dist/VideoEditor-$env:PKG_VERSION-win-arm64.zip" -Force
 
       - name: Upload portable Windows x64 (.zip)
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: VideoEditor-${{ steps.pkgver.outputs.version }}-win-x64-zip
           path: dist/VideoEditor-${{ steps.pkgver.outputs.version }}-win-x64.zip
           if-no-files-found: error
+          retention-days: 3
 
       - name: Upload portable Windows ARM64 (.zip)
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: VideoEditor-${{ steps.pkgver.outputs.version }}-win-arm64-zip
           path: dist/VideoEditor-${{ steps.pkgver.outputs.version }}-win-arm64.zip
           if-no-files-found: error
+          retention-days: 3
 
       - name: Upload framework-dependent folder (requires .NET 8 Desktop Runtime)
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: VideoEditor-framework-dependent-net8.0-windows
           path: bin/Release/net8.0-windows/
           if-no-files-found: error
+          retention-days: 3
 
       - name: Summary
         if: success()
